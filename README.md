@@ -39,6 +39,8 @@ htpasswd -c .htpasswd admin
 # Start the secured application
 docker-compose up
 
+```
+
 Why: Prevents container breakout attacks. If the application is compromised, the attacker has limited privileges instead of full root access to the container.
 
 2. HTTPS with SSL/TLS Encryption
