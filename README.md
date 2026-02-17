@@ -1,6 +1,5 @@
 # Security Playground - Hardened Edition
 
-![last commit](https://flat.badgen.net/github/last-commit/sysdiglabs/security-playground?icon=github) ![licence](https://flat.badgen.net/github/license/sysdiglabs/security-playground) ![docker pulls](https://flat.badgen.net/docker/pulls/sysdiglabs/security-playground?icon=docker)
 
 The security playground is an HTTP web server to simulate security breaches. It allows you to read, write, and execute commands in a containerized environment.
 
