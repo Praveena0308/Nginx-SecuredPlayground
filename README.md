@@ -26,7 +26,7 @@ This version includes the following security improvements:
 
 ```bash
 # Clone the repository
-git clone <https://github.com/Praveena0308/Security-playgorund.git>
+git clone <https://github.com/Praveena0308/Nginx-SecuredPlayground>
 cd security-playground
 
 # Generate SSL certificate (for HTTPS)
