@@ -58,3 +58,76 @@ Rate limiting to prevent brute force attacks
 Security headers for browser protection
 
 Why: Adds multiple security layers without modifying the original application code. The vulnerable app remains unchanged but is now protected by a secure gateway.
+
+flowchart TD
+    A[💻 User Request:<br/>curl http://localhost:8080/etc/shadow] --> B{🌐 Nginx on Port 80};
+    
+    B -->|🔄 301 Redirect| C[🔒 Forced to HTTPS:<br/>curl https://localhost/etc/shadow];
+    
+    C --> D{🔐 Nginx on Port 443<br/>SSL Certificate Check};
+    
+    D -->|📜 Self-signed Cert| E[⚠️ curl Error:<br/>SSL certificate problem<br/>Self-signed certificate];
+    
+    E --> F[🔧 Developer Uses -k Flag:<br/>curl -k https://localhost/etc/shadow<br/>Bypass SSL for testing];
+    
+    F --> G{🛡️ Nginx Basic Auth};
+    
+    G -->|❌ Wrong Password| H[⛔ 401 Unauthorized<br/>Access Denied];
+    G -->|✅ Valid Credentials| I[➡️ Request Forwarded to App];
+    
+    I --> J{👤 App Running as<br/>Non-Root User};
+    
+    J --> K[📁 Attempt to Read /etc/shadow];
+    
+    K --> L{⚖️ Permission Check<br/>File: -rw-r----- root shadow};
+    
+    L -->|❌ No Read Permission| M[🛑 403 Permission Denied<br/>✅ SECURITY WORKING!];
+    
+    L -->|⚠️ If Root User| N[💥 Original Vulnerability<br/>Password Hashes Exposed];
+    
+    style A fill:#e1f5fe,stroke:#01579b
+    style B fill:#fff3e0,stroke:#e65100
+    style C fill:#fff3e0,stroke:#e65100
+    style D fill:#fff3e0,stroke:#e65100
+    style E fill:#ffebee,stroke:#b71c1c
+    style F fill:#fff3e0,stroke:#e65100
+    style G fill:#fff3e0,stroke:#e65100
+    style H fill:#ffebee,stroke:#b71c1c
+    style I fill:#e8f5e8,stroke:#1b5e20
+    style J fill:#e8f5e8,stroke:#1b5e20
+    style K fill:#e8f5e8,stroke:#1b5e20
+    style L fill:#e8f5e8,stroke:#1b5e20
+    style M fill:#a5d6a7,stroke:#1b5e20,stroke-width:4px
+    style N fill:#ffccbc,stroke:#bf360c,stroke-width:2px
+
+graph LR
+    subgraph "🔓 ATTEMPTED ATTACK"
+        A[💻 Hacker] --> B[🌐 HTTP Request<br/>port 8080]
+    end
+    
+    subgraph "🛡️ YOUR SECURITY LAYERS"
+        B --> C[1️⃣ Nginx Port 80<br/>HTTP Listener]
+        C --> D[2️⃣ 301 Redirect<br/>Force HTTPS]
+        D --> E[3️⃣ Nginx Port 443<br/>SSL/TLS Encryption]
+        E --> F[4️⃣ Basic Authentication<br/>Login Prompt]
+        F --> G[5️⃣ Rate Limiting<br/>5 requests/minute]
+        G --> H[6️⃣ Security Headers<br/>X-Frame-Options, etc.]
+        H --> I[7️⃣ Proxy Pass to App]
+    end
+    
+    subgraph "📦 CONTAINER"
+        I --> J[8️⃣ Gunicorn<br/>2 workers × 4 threads]
+        J --> K[9️⃣ Flask App<br/>Original Vulnerable Code]
+        K --> L[🔟 Non-Root User<br/>UID 1000]
+    end
+    
+    subgraph "📁 FILE ACCESS ATTEMPT"
+        L --> M[⚙️ Attempt: Read /etc/shadow]
+        M --> N{🔐 Permission Check}
+        N -->|❌ Denied| O[⛔ 403 Forbidden<br/>✅ SECURE!]
+        N -->|⚠️ If Root| P[💥 Password Hashes Exposed<br/>❌ VULNERABLE!]
+    end
+    
+    style A fill:#ffebee
+    style O fill:#a5d6a7,stroke:#1b5e20,stroke-width:4px
+    style P fill:#ffccbc,stroke:#bf360c
