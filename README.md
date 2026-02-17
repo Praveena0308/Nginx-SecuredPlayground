@@ -60,6 +60,9 @@ Security headers for browser protection
 Why: Adds multiple security layers without modifying the original application code. The vulnerable app remains unchanged but is now protected by a secure gateway.
 
 flowchart TD
+    
+```mermaid
+flowchart TD
     A[💻 User Request:<br/>curl http://localhost:8080/etc/shadow] --> B{🌐 Nginx on Port 80};
     
     B -->|🔄 301 Redirect| C[🔒 Forced to HTTPS:<br/>curl https://localhost/etc/shadow];
@@ -99,35 +102,6 @@ flowchart TD
     style L fill:#e8f5e8,stroke:#1b5e20
     style M fill:#a5d6a7,stroke:#1b5e20,stroke-width:4px
     style N fill:#ffccbc,stroke:#bf360c,stroke-width:2px
-
-graph LR
-    subgraph "🔓 ATTEMPTED ATTACK"
-        A[💻 Hacker] --> B[🌐 HTTP Request<br/>port 8080]
-    end
     
-    subgraph "🛡️ YOUR SECURITY LAYERS"
-        B --> C[1️⃣ Nginx Port 80<br/>HTTP Listener]
-        C --> D[2️⃣ 301 Redirect<br/>Force HTTPS]
-        D --> E[3️⃣ Nginx Port 443<br/>SSL/TLS Encryption]
-        E --> F[4️⃣ Basic Authentication<br/>Login Prompt]
-        F --> G[5️⃣ Rate Limiting<br/>5 requests/minute]
-        G --> H[6️⃣ Security Headers<br/>X-Frame-Options, etc.]
-        H --> I[7️⃣ Proxy Pass to App]
-    end
+    ```
     
-    subgraph "📦 CONTAINER"
-        I --> J[8️⃣ Gunicorn<br/>2 workers × 4 threads]
-        J --> K[9️⃣ Flask App<br/>Original Vulnerable Code]
-        K --> L[🔟 Non-Root User<br/>UID 1000]
-    end
-    
-    subgraph "📁 FILE ACCESS ATTEMPT"
-        L --> M[⚙️ Attempt: Read /etc/shadow]
-        M --> N{🔐 Permission Check}
-        N -->|❌ Denied| O[⛔ 403 Forbidden<br/>✅ SECURE!]
-        N -->|⚠️ If Root| P[💥 Password Hashes Exposed<br/>❌ VULNERABLE!]
-    end
-    
-    style A fill:#ffebee
-    style O fill:#a5d6a7,stroke:#1b5e20,stroke-width:4px
-    style P fill:#ffccbc,stroke:#bf360c
